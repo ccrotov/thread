@@ -11,13 +11,36 @@ var (
 	isWork bool = false
 )
 
+func SliceEnum(lines []string, threads int, cback func(ln string)) error {
+	defer Stop()
+	isWork = true
+
+	chn := make(chan string, threads)
+
+	if len(lines) == 0 {
+		return errors.New("list is empty")
+	}
+
+	var wg sync.WaitGroup
+	for i := 0; i < cap(chn); i++ {
+		go worker(chn, &wg, cback)
+	}
+
+	for _, line := range lines {
+		wg.Add(1)
+		chn <- line
+	}
+
+	wg.Wait()
+	close(chn)
+	return nil
+}
+
 func FileEnum(fname string, threads int, cback func(ln string)) error {
 	defer Stop()
 	isWork = true
 
 	var lines []string
-
-	chn := make(chan string, threads)
 
 	file, err := os.Open(fname)
 	if err != nil {
@@ -43,19 +66,7 @@ func FileEnum(fname string, threads int, cback func(ln string)) error {
 		return scaner.Err()
 	}
 
-	var wg sync.WaitGroup
-	for i := 0; i < cap(chn); i++ {
-		go worker(chn, &wg, cback)
-	}
-
-	for _, line := range lines {
-		wg.Add(1)
-		chn <- line
-	}
-
-	wg.Wait()
-	close(chn)
-	return nil
+	return SliceEnum(lines, threads, cback)
 }
 
 func Stop() {
