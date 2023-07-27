@@ -11,6 +11,7 @@ var (
 	isWork bool = false
 )
 
+// Multithreads the slice by passing each element to an external function
 func SliceEnum(lines []string, threads int, cback func(ln string)) error {
 	defer Stop()
 	isWork = true
@@ -36,6 +37,7 @@ func SliceEnum(lines []string, threads int, cback func(ln string)) error {
 	return nil
 }
 
+// Multithreaded file processing by passing each line to an external function
 func FileEnum(fname string, threads int, cback func(ln string)) error {
 	defer Stop()
 	isWork = true
