@@ -1,3 +1,3 @@
-module github.com/fout32/thread
+module github.com/ccrotov/thread
 
 go 1.20
